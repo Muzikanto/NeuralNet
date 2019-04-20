@@ -1,16 +1,16 @@
 import fs = require("fs");
-import {join} from "path";
-import {IReader} from "./typings/typings";
+import {resolve} from "path";
+import {IReader} from "./Reader.typings";
 
 class Reader {
-    protected pathToData = join(__dirname, '..');
+    public pathToData = resolve('');
 
     constructor(props: IReader) {
-        props.pathToData && (this.pathToData = props.pathToData);
+        props.pathToData && (this.pathToData = resolve(props.pathToData));
     }
 
     public write(path: string, data: string): Promise<boolean> {
-        const pathToFile = join(this.pathToData, path);
+        const pathToFile = resolve(this.pathToData, path);
 
         return new Promise((resolve) => {
             fs.writeFile(pathToFile, data, (err: Error) => {
@@ -24,7 +24,7 @@ class Reader {
     }
 
     public read(path: string): string | null {
-        const pathToFile = join(this.pathToData, path);
+        const pathToFile = resolve(this.pathToData, path);
 
         if (!fs.existsSync(pathToFile)) {
             console.log("Не найден файл " + path);
@@ -35,7 +35,7 @@ class Reader {
     }
 
     protected createFolder(path: string): Promise<boolean> {
-        const pathToFolder = join(this.pathToData, path);
+        const pathToFolder = resolve(this.pathToData, path);
 
         return new Promise((resolve) => {
             if (!fs.existsSync(path)) {

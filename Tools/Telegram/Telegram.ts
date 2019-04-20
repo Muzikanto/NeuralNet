@@ -1,5 +1,5 @@
 import * as Bot from 'node-telegram-bot-api';
-import {IteleramListneers} from './typings/typings';
+import {IteleramListneers} from './Telegram.typings';
 
 class TelegramBot {
     protected token: string;
