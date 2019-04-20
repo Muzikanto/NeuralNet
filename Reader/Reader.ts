@@ -1,6 +1,6 @@
 import fs = require("fs");
 import {join} from "path";
-import {IReader} from "./typings";
+import {IReader} from "./typings/typings";
 
 class Reader {
     protected pathToData = join(__dirname, '..');
@@ -23,24 +23,15 @@ class Reader {
         });
     }
 
-    public writeJSON(path: string, data: Object): Promise<boolean> {
-        return this.write(path, JSON.stringify(data));
-    }
-
     public read(path: string): string | null {
         const pathToFile = join(this.pathToData, path);
 
         if (!fs.existsSync(pathToFile)) {
+            console.log("Не найден файл " + path);
             return null;
         } else {
             return fs.readFileSync(pathToFile, 'utf8');
         }
-    }
-
-    public readJSON(path: string): { [key: string]: any } | null {
-        const read = this.read(path);
-
-        return read ? JSON.parse(read) : null;
     }
 
     protected createFolder(path: string): Promise<boolean> {

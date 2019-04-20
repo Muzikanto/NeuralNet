@@ -1,5 +1,5 @@
 import * as Bot from 'node-telegram-bot-api';
-import {IteleramListneers} from './typings';
+import {IteleramListneers} from './typings/typings';
 
 class TelegramBot {
     protected token: string;
@@ -29,8 +29,8 @@ class TelegramBot {
         });
     }
 
-    public sendToMe(text: string) {
-        this.api.sendMessage('674525070', text);
+    public sendToMe(text: string): Promise<Bot.Message> {
+        return this.api.sendMessage('674525070', text);
     }
 }
 
