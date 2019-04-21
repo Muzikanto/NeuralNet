@@ -1,10 +1,10 @@
 import Reader from "../Reader";
 
 class JSONReader extends Reader {
-    public read<T>(path: string): T | null {
-        const result = super.read(path);
+    public read(path: string) {
+        const data = super.read(path);
 
-        return result ? JSON.parse(result) : null;
+        return data ? JSON.parse(data) : null;
     }
 
     public write(path: string, data: Object): Promise<boolean> {

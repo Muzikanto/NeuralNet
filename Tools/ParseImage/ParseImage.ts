@@ -84,7 +84,7 @@ class ParseImage {
         img.write(resolve(path));
     }
 
-    public toJSON(){
+    public toJSON() {
         return this.data.pixels;
     }
 }

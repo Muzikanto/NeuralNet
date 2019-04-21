@@ -2,5 +2,8 @@ import {INeuralNetworkTrainingOptions} from "brain.js";
 
 export interface INeuralNet {
     pathToData?: string;
-    trainOptions?: INeuralNetworkTrainingOptions
+    inputSize?: number;
+    hiddenLayers?: number;
+    iterations?: number;
+    learningRate?: number;
 }

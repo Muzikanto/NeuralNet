@@ -1,3 +1,3 @@
-import {testNeuralNet} from "./features/NeuralImage/NeuralImage";
+import {testNeuralNet} from "./features/NeuralString/NeuralString";
 
 testNeuralNet();

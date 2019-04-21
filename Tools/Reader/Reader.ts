@@ -27,7 +27,6 @@ class Reader {
         const pathToFile = resolve(this.pathToData, path);
 
         if (!fs.existsSync(pathToFile)) {
-            console.log("Не найден файл " + path);
             return null;
         } else {
             return fs.readFileSync(pathToFile, 'utf8');
