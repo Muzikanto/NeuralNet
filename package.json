@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "ts-node ./index.ts",
-    "test": "hermione ./hack.hermione.js --wait-timeout=100000"
+    "get-images": "hermione ./features/NeuralImage/hack.hermione.js --wait-timeout=100000 --config=./features/NeuralImage/.hermione.conf.js"
   },
   "keywords": [
     "net"

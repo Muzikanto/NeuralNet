@@ -3,6 +3,7 @@ import {INeuralNetworkJSON, INeuralNetworkTrainingOptions} from "brain.js";
 import JSONReader from "../Reader/_json/JSONReader";
 import {INeuralNet} from "./NeuralNet.typings";
 import ParseImage from "../ParseImage/ParseImage";
+import {IObject} from "../../typings/global";
 
 class NeuralNet {
     protected api = new brain.NeuralNetwork();
@@ -21,7 +22,7 @@ class NeuralNet {
     public async train(urls: { url: string, is: string }[]) {
         const data = [];
 
-        for(const v of urls) {
+        for (const v of urls) {
             data.push({input: await this.loadImage(v.url), output: v.is})
         }
 
@@ -48,7 +49,16 @@ class NeuralNet {
         await imgParser.loadImage(url);
         imgParser.prepareImage(8);
 
-        return imgParser.toJSON();
+        const pixels = imgParser.toJSON();
+        const map: IObject = {};
+
+        for (let i = 0; i < pixels.length; i++) {
+            for (let j = 0; j < pixels[0].length; j++) {
+                map[`${i}_${j}`] = pixels[i][j];
+            }
+        }
+
+        return map;
     }
 }
 

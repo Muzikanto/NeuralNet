@@ -1,0 +1,24 @@
+{
+ "hermione": {
+  "scroll": 100000,
+  "pause": 45000
+ },
+ "train": [
+  {
+   "text": "машина",
+   "model": "car"
+  },
+  {
+   "text": "человек",
+   "model": "human"
+  },
+  {
+   "text": "кот",
+   "model": "cat"
+  },
+  {
+   "text": "мяч",
+   "model": "ball"
+  }
+ ]
+}
