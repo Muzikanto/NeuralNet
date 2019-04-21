@@ -1,69 +1,67 @@
 import JSONReader from "../Reader/_json/JSONReader";
-import {INeuralNet} from "./NeuralNet.typings";
+import {INeuralInputItem, INeuralNetProps, INeuralSaved, INeuralTrainItem} from "./NeuralNet.typings";
 import {Layer, Network} from 'synaptic';
-import {
-    INeuralStringItem,
-    INeuralStringSaved,
-    INeuralStringTrainItem
-} from "../../features/NeuralString/NeuralString.typings";
 import Utils from "../Utils";
 
-class NeuralNet {
+abstract class NeuralNet {
     protected reader = new JSONReader({pathToData: 'test'});
-    protected inputSize = 10;
-    protected hiddenLayers = 10;
+    protected inputSize = 2;
+    protected hiddenLayers = 3;
+    protected outputSize = 1;
     protected iterations = 20000;
     protected learningRate = 0.2;
+    protected log = false;
+    protected net: Network;
+    protected netName = 'net';
 
-    constructor(props: INeuralNet) {
+    constructor(props: INeuralNetProps) {
         props.pathToData && (this.reader.pathToData = props.pathToData);
         props.inputSize && (this.inputSize = props.inputSize);
         props.hiddenLayers && (this.hiddenLayers = props.hiddenLayers);
         props.iterations && (this.iterations = props.iterations);
         props.learningRate && (this.learningRate = props.learningRate);
+        props.log && (this.log = props.log);
+        props.netName && (this.netName = props.netName);
+
+        this.net = this.createNet();
     }
 
-    public async train(rawData: INeuralStringItem[]) {
-        const trainData = rawData.map((el: INeuralStringItem, index: number, arr: INeuralStringItem[]) => ({
-            value: this.prepareItem(el.input),
-            id: index === 0 ? index : index / (arr.length - 1),
-            ...el
-        }));
+    public async train(rawData: INeuralInputItem[]) {
+        const trainData = await this.prepareTrainData(rawData);
 
-        const net = this.createNet();
-
-        const learningRate = this.learningRate;
         for (let i = 0; i < this.iterations; i++) {
-            Utils.print(`Learning ${(i + 1) * trainData.length} of ${this.iterations * trainData.length}`);
+            this.logProcess(`Learning ${(i + 1)} of ${this.iterations}`);
             for (let j = 0; j < trainData.length; j++) {
-                net.activate(trainData[j].value);
-                net.propagate(learningRate, [trainData[j].id]);
+                this.net.activate(trainData[j].values);
+                this.net.propagate(this.learningRate, [trainData[j].id]);
             }
         }
-        Utils.print('\n');
+        this.logProcess(`Learned ${trainData.length} data in ${this.iterations} iterations\n`);
 
-        this.reader.write('net.json', {
-            network: net.toJSON(),
-            trainData: trainData.map(el => {
-                delete el.value;
-                return el;
-            })
-        });
+        await this.saveData(trainData);
     }
 
     public async run(rawData: string[]) {
-        const {network, trainData} = this.reader.read('net.json') as INeuralStringSaved;
-        const net = Network.fromJSON(network);
-        const testData = rawData.map(el => this.prepareItem(el));
+        const {network, trainData} = this.reader.read(`${this.netName}.json`) as INeuralSaved;
+        this.net = Network.fromJSON(network);
+        const testData = [];
+
+        for(const v of rawData){
+            testData.push(await this.prepareItem(v));
+        }
 
         const results = [];
         for (let i = 0; i < testData.length; i++) {
-            results.push(net.activate(testData[i])[0]);
+            results.push(this.net.activate(testData[i])[0]);
         }
 
+        return this.prepareOutputData(results, trainData);
+    }
+
+    protected prepareOutputData(results: number[], trainData: INeuralTrainItem[]) {
         return results.map(el => {
             let min = 10;
-            let current: INeuralStringTrainItem | null = null;
+            let current: INeuralTrainItem | null = null;
 
             for (const v of trainData) {
                 let diff = Math.abs(v.id - el);
@@ -77,14 +75,45 @@ class NeuralNet {
         })
     }
 
+    private async prepareTrainData(rawData: INeuralInputItem[]): Promise<INeuralTrainItem[]> {
+        const result = [];
+
+        for(let i = 0; i < rawData.length; i++){
+            result[i] = {
+                values: await this.prepareItem(rawData[i].input),
+                id: i === 0 ? i : i / (rawData.length - 1),
+                ...rawData[i]
+            }
+        }
+
+        return result;
+    }
+
+    protected async prepareItem(item: any): Promise<number[]> {
+        return item;
+    }
+
+    protected async saveData(trainData: any[]) {
+        await this.reader.write(`${this.netName}.json`, {
+            network: this.net.toJSON(),
+            trainData: trainData.map(el => {
+                delete el.values;
+                return el;
+            })
+        });
+    }
+
     protected createNet() {
+        const time = Date.now();
+        this.log && console.log('Start Create Net');
         const A = new Layer(this.inputSize);
         const B = new Layer(this.hiddenLayers);
-        const C = new Layer(1);
+        const C = new Layer(this.outputSize);
 
         A.project(B);
+        this.log && console.log('Connect to Hidden', new Date(Date.now() - time).getSeconds());
         B.project(C);
-
+        this.log && console.log('Connect to Output ', new Date(Date.now() - time).getSeconds());
         return new Network({
             input: A,
             hidden: [B],
@@ -92,17 +121,8 @@ class NeuralNet {
         });
     }
 
-    protected prepareItem(str: string) {
-        if (str.length > this.inputSize) {
-            throw new Error(`Over input layer size: ${str}`);
-        }
-
-        const parsed = str.split('').map(ch => ch.charCodeAt(0) / Math.pow(2, 8));
-        const fill = new Array(parsed.length < this.inputSize ? this.inputSize - parsed.length : 0)
-            .fill(0)
-            .map(el => Math.floor(Math.random()));
-
-        return [...parsed, ...fill];
+    protected logProcess(str: string) {
+        this.log && Utils.print(str);
     }
 }
 

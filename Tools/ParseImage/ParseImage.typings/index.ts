@@ -12,4 +12,5 @@ export interface IParseImage {
         height: number;
     };
     resize?: boolean;
+    greyScale?: boolean;
 }

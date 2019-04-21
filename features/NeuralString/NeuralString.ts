@@ -1,8 +1,8 @@
-import NeuralNet from "../../Tools/NeuralNet/NeuralNet";
+import NeuralNet from "../../Tools/NeuralNet/_String/NeuralNet_String";
 import Utils from "../../Tools/Utils";
 
 export async function testNeuralNet() {
-    const net = new NeuralNet({inputSize: 13});
+    const net = new NeuralNet({inputSize: 13, hiddenLayers: 13, log: true, netName: 'net_string'});
     await net.train([
         {input: 'Hello World!!'},
         {input: 'Suck my dick!'},
@@ -15,7 +15,8 @@ export async function testNeuralNet() {
     console.log(await net.run([
         'Hello Wo ld.!',
         'Suck ru dick',
-        'Daniyar mudak'
+        'Daniyar mudak',
+        'Привет мудак'
     ]));
-    // [ 'Hello World!!', 'Suck my dick!', 'Daniyar pidor' ]
+    // [ 'Hello World!!', 'Suck my dick!', 'Daniyar pidor', 'Привет мир!!!' ]
 }

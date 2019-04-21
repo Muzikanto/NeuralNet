@@ -10,6 +10,7 @@ class ParseImage {
         width: 0
     };
     protected resize = false;
+    protected greyScale = false;
 
     constructor(props: IParseImage) {
         props.size && (this.size = props.size);
@@ -28,7 +29,7 @@ class ParseImage {
         this.data.width = width;
         this.data.height = height;
 
-        image.greyscale();
+        this.greyScale && image.greyscale();
 
         for (let i = 0; i < this.data.width; i++) {
             this.data.pixels[i] = [];
