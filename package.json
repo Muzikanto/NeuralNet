@@ -4,7 +4,8 @@
   "description": "Нейронка",
   "main": "index.ts",
   "scripts": {
-    "start": "ts-node  --max-old-space-size=8192 ./index.ts",
+    "start": "ts-node ./index.ts",
+    "build": "./node_modules/.bin/webpack --mode production",
     "get-images": "hermione ./features/NeuralImage/hack.hermione.js --wait-timeout=100000 --config=./features/NeuralImage/.hermione.conf.js"
   },
   "keywords": [
@@ -31,7 +32,10 @@
     "@types/node-telegram-bot-api": "^0.30.4",
     "@types/request": "^2.48.1",
     "@types/synaptic": "^1.0.3",
+    "ts-loader": "^5.3.3",
     "ts-node": "^8.0.3",
-    "typescript": "^3.4.3"
+    "typescript": "^3.4.3",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
   }
 }

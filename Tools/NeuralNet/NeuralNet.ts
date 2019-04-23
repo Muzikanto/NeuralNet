@@ -4,7 +4,7 @@ import {Layer, Network} from 'synaptic';
 import Utils from "../Utils";
 
 abstract class NeuralNet {
-    protected reader = new JSONReader({pathToData: 'test'});
+    protected reader = new JSONReader({pathToData: 'dist'});
     protected inputSize = 2;
     protected hiddenLayers = 3;
     protected outputSize = 1;

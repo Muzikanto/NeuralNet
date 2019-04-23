@@ -1,7 +1,7 @@
 import * as Bot from 'node-telegram-bot-api';
 import {IteleramListneers} from './Telegram.typings';
 
-class TelegramBot {
+class Telegram {
     protected token: string;
     protected api: Bot;
 
@@ -34,4 +34,4 @@ class TelegramBot {
     }
 }
 
-export default TelegramBot;
+export default Telegram;
