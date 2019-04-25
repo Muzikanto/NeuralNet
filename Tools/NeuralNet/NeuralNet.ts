@@ -29,6 +29,7 @@ abstract class NeuralNet {
     public async train(rawData: INeuralInputItem[]) {
         const trainData = await this.prepareTrainData(rawData);
 
+        console.log(`Learn ${rawData.length} items`);
         for (let i = 0; i < this.iterations; i++) {
             this.logProcess(`Learning ${(i + 1)} of ${this.iterations}`);
             for (let j = 0; j < trainData.length; j++) {
@@ -104,16 +105,14 @@ abstract class NeuralNet {
     }
 
     protected createNet() {
-        const time = Date.now();
         this.log && console.log('Start Create Net');
         const A = new Layer(this.inputSize);
         const B = new Layer(this.hiddenLayers);
         const C = new Layer(this.outputSize);
 
         A.project(B);
-        this.log && console.log('Connect to Hidden', new Date(Date.now() - time).getSeconds());
         B.project(C);
-        this.log && console.log('Connect to Output ', new Date(Date.now() - time).getSeconds());
+
         return new Network({
             input: A,
             hidden: [B],

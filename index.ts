@@ -1,9 +1,7 @@
-// import {testNeuralNet} from "./features/NeuralString/NeuralString";
+import {testNeuralNet} from "./features/NeuralString/NeuralString";
 
-// testNeuralNet();
+testNeuralNet();
 
-// import createFilmsListneerBot from "./features/Kino/Kino";
-//
-const bot = createFilmsListneerBot();
-bot.addStrictListeners({});
-bot.checkNewFilms().then();
+// const bot = createFilmsListneerBot();
+// bot.addStrictListeners({});
+// bot.checkNewFilms().then();
