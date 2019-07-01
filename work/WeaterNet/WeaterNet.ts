@@ -5,12 +5,7 @@ class WeaterNet extends Net {
 
     protected prepareTrainData(rawData: number[]) {
         const trainData: any[] = [];
-        const {min, max} = rawData.reduce((acc, el) => ({
-            min: el < acc.min ? el : acc.min,
-            max: el > acc.max ? el : acc.max
-        }), {max: 0, min: 273});
-
-        const arr = rawData.map(this.prepareItem.bind({max, min}));
+        const arr = rawData.map(this.prepareItem);
 
         for (let i = this.count; i < rawData.length; i++) {
             trainData.push({
@@ -26,8 +21,8 @@ class WeaterNet extends Net {
         return this.dataToObj(super.prepareTestData(rawData));
     }
 
-    protected prepareItem(this: { max: number, min: number }, v: number) {
-        return v / 273
+    protected prepareItem(v: number) {
+        return v / 273;
     }
 
     private dataToObj(arr: any) {

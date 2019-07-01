@@ -3,11 +3,14 @@ import WeaterNet from "./work/WeaterNet/WeaterNet";
 
 // const temp = data.list.map((el: any) => (el.main.temp));
 const temp = [
-    240, 245, 250, 255, // 1 похожий порядок
-    234, 243, 252, 251,
-    241, 245, 252, 255, // 2 похожий порядок
-    232, 260, 260, 232,
-    241, 243, 252,      // выведет 255
+    -15, -12, -11, -5,
+    -3, -2, -2, -1,
+    0, 1, -1, -2,
+    1, 0, 2, 4,
+    5, 7, 6, 9,
+    11, 12, 13, 16,
+    13, 11, 12, 15,
+    10, 12, 14, 15
 ];
 
 (async () => {
@@ -16,11 +19,11 @@ const temp = [
     await net.train(temp, true);
     // await net.load();
 
-    const test = temp.slice(-3);
+    const test = [5, 7, 6];
     const netResult: any = await net.run(test);
     const keys = Object.keys(netResult);
     const result = Number(keys.reduce((acc, key) => netResult[key] > netResult[acc] ? key : acc, keys[0]));
 
-    console.log(temp.slice(-3));
+    console.log(test);
     console.log(result);
 })();
