@@ -1,7 +1,5 @@
-export type IparseImageMap = number[][];
-
 export type IparseImageData = {
-    pixels: IparseImageMap;
+    pixels: number[][];
     width: number;
     height: number;
 };
@@ -12,5 +10,4 @@ export interface IParseImage {
         height: number;
     };
     resize?: boolean;
-    greyScale?: boolean;
 }
