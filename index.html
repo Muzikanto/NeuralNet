@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Images Neural Net</title>
+    <link rel="stylesheet" href="dist/index.css">
+</head>
+<body>
+
+
+<div class="TrainContainer">
+    <img id="input" src="dist/assets/input.png" class="Container" width="600" height="400">
+    <img id="output" src="dist/assets/output.png" class="Container" width="600" height="400">
+</div>
+<div class="Controlls">
+    <button id="start_train">Start Learning</button>
+    <input id="input_url" placeholder="Enter Image Url">
+    <span id="iterations">Iteration: 0</span>
+    <input id="drop_gray" type="checkbox" checked="checked"> Drop gray
+</div>
+<div class="TrainContainer">
+    <img id="test" src="dist/assets/test.png" class="Container" width="600" height="400">
+    <canvas id="result" width="600" height="400" class="Container"></canvas>
+</div>
+<script src="dist/index.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 export type IparseImageData = {
-    pixels: number[][];
+    pixels: number[];
     width: number;
     height: number;
 };

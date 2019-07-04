@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    entry: './features/Kino/Kino.ts',
+    entry: './work/ImageNet/index.ts',
     module: {
         rules: [
             {
@@ -13,10 +13,10 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.js']
     },
-    target: "node",
+    target: "web",
     output: {
         filename: 'index.js',
         path: path.resolve(__dirname, 'dist'),
-        libraryTarget: 'commonjs'
+        libraryTarget: 'window'
     }
 };

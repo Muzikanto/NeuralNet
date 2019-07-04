@@ -1,0 +1,16 @@
+.TrainContainer{
+    display: flex;
+}
+
+.Container {
+    border: solid 1px black;
+}
+
+.Controlls{
+    display: flex;
+    justify-content: center;
+}
+
+.Controlls > * {
+    margin-right: 20px;
+}
