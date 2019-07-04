@@ -28,6 +28,13 @@ async function testImageNet() {
 
     parser.setPixels(result);
     await parser.draw('test.png');
+
+    // parser.setPixels(input);
+    // await parser.draw('input.png');
+    // parser.setPixels(output);
+    // await parser.draw('output.png');
+    // parser.setPixels(test);
+    // await parser.draw('test.png');
 }
 
 export default testImageNet;

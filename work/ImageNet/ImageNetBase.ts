@@ -106,6 +106,7 @@ class ImageNet {
     }
 
     public restore(){
+        this.perceptron.reset();
         this.perceptron.restore();
     }
 

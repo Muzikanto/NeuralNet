@@ -10,22 +10,40 @@ const textIterations = document.getElementById('iterations') as HTMLSpanElement;
 const inputUrl = document.getElementById('input_url') as HTMLInputElement;
 const dropGray = document.getElementById('drop_gray') as HTMLInputElement;
 const inputImage = document.getElementById('input') as HTMLImageElement;
-const testImage  = document.getElementById('test') as HTMLImageElement;
-const outputImage  = document.getElementById('output') as HTMLImageElement;
+const testImage = document.getElementById('test') as HTMLImageElement;
+const outputImage = document.getElementById('output') as HTMLImageElement;
 
-const input: number[] = Array.from(getData(inputImage).data);
-let test: number[] = Array.from(getData(testImage).data);
-const output: number[] = Array.from(getData(outputImage).data);
+let input: number[];
+let test: number[];
+let output: number[];
+
+window.onload = () => {
+    input = Array.from(getData(inputImage).data);
+    test = Array.from(getData(testImage).data);
+    output = Array.from(getData(outputImage).data);
+};
 
 btnStart.onclick = runTrain;
 inputUrl.onchange = (e: any) => {
     net.restore();
     testImage.src = e.target.value;
-    test = Array.from(getData(testImage).data);
+    testImage.setAttribute('crossOrigin', '');
+
+    testImage.onload = () => {
+        test = Array.from(getData(testImage).data);
+
+        const imgData = ctx.getImageData(0, 0, size.width, size.height);
+
+        for (let i = 0; i < imgData.data.length; i++) {
+            imgData.data[i] = test[i];
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+    }
 };
 
-
 function runTrain() {
+    net.restore();
     net.trainAsync([
         {input, output}
     ], {
@@ -37,17 +55,25 @@ function runTrain() {
     }).then()
 }
 
+let max = 64;
+
 function drawResult(iteration: number) {
     const checked = dropGray.checked;
     const result = net.run(test);
 
     const imgData = ctx.getImageData(0, 0, size.width, size.height);
+
     for (let i = 0; i < imgData.data.length; i++) {
         if (checked) {
-            imgData.data[i] = result[i] > 60 ? 255 : 0;
+            imgData.data[i] = result[i] > max ? 255 : 0;
         } else {
             imgData.data[i] = result[i];
         }
+    }
+
+    const next = result.reduce((acc, el) => acc + el, 0) / result.length;
+    if (Math.abs(next - max) > 5) {
+        max += next > max ? 5 : -5;
     }
 
     textIterations.innerHTML = 'Iteration: ' + iteration;
@@ -61,7 +87,7 @@ function getData(img: HTMLImageElement) {
 
     const _ctx = _canvas.getContext('2d') as CanvasRenderingContext2D;
 
-    _ctx.drawImage(img, 0, 0);
+    _ctx.drawImage(img, 0, 0, size.width, size.height);
 
     return _ctx.getImageData(0, 0, size.width, size.height);
 }
