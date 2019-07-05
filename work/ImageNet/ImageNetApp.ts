@@ -2,7 +2,7 @@ import {Network} from "synaptic";
 import * as fs from "fs";
 import ImageNetBase from "./ImageNetBase";
 
-class ImageNet extends ImageNetBase {
+class ImageNetApp extends ImageNetBase {
     protected path = 'dist/net.json';
 
     public save() {
@@ -16,6 +16,17 @@ class ImageNet extends ImageNetBase {
         const netContent = JSON.parse(fileContent);
         this.perceptron = Network.fromJSON(netContent)
     }
+
+    protected print(message: string, singleLine?: boolean) {
+        if (singleLine) {
+            // @ts-ignore
+            process.stdout.clearLine();
+            // @ts-ignore
+            process.stdout.cursorTo(0);
+        }
+
+        process.stdout.write(message);
+    }
 }
 
-export default ImageNet;
+export default ImageNetApp;

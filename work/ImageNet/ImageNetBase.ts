@@ -1,101 +1,71 @@
 import {Layer, Network} from "synaptic";
-import {ITrainData, ITrainOpts} from "./ImageNet.typings";
+import {ITestData, ITrainData, ITrainOpts, ITrainOptsRaw} from "./ImageNet.typings";
 
 class ImageNet {
-    protected perceptron: Network = this.createPerceptron();
+    protected perceptron: Network;
     protected size: { width: number, height: number };
+    protected matrix: number[][];
+    protected matrixSizes: {
+        size: number,
+        center: number,
+    };
 
     constructor(size: { width: number, height: number }) {
         this.size = size;
+        this.matrix = [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1],
+        ];
+        this.matrixSizes = {
+            size: this.matrix.length,
+            center: Math.floor(this.matrix.length / 2),
+        };
+        this.perceptron = this.createPerceptron();
     }
 
-    public train(trainData: ITrainData, options?: ITrainOpts) {
-        const config = {
-            ...{
-                log: false,
-                iterations: 100,
-                logPeriod: 10,
-                callback: () => {
-                },
-                callbackPeriod: 1,
-            },
-            ...options,
-        };
+    public train(trainData: ITrainData, options?: ITrainOptsRaw) {
+        const config = this.prepareTrainConfig(options);
 
-        for (let i = 0; i < config.iterations; i++) {
-            if (config.log && i % config.logPeriod === 0) {
-                console.log('Iteration: ' + i);
-            }
-            for (const trainItem of trainData) {
-                this.iteration(trainItem);
-            }
-
-            if (i % config.callbackPeriod === 0) {
-                config.callback(i);
-            }
+        for (let iteration = 0; iteration < config.iterations; iteration++) {
+            this.singleTrain(trainData, iteration, config);
         }
 
-        config.log && console.log('Finish Train');
+        const doneTime = new Date().getTime() - config.startTime;
+        this.print('\nTime: ' + (doneTime / 1000).toFixed(2) + 's' + '\n');
     };
 
-    public trainAsync(trainData: ITrainData, options?: ITrainOpts) {
-        const config = {
-            ...{
-                log: false,
-                iterations: 100,
-                logPeriod: 10,
-                callback: () => {},
-                callbackPeriod: 1,
-            },
-            ...options,
-        };
-        let iteration = 0;
+    public run({data, width, height}: ITestData) {
+        const result: number[] = [...data];
+        const _pixel = this.getPixel.bind({size: {width, height}});
+        let done = 0;
+        const startTime = new Date();
 
-        return new Promise((resolve)=>{
-            const interval = setInterval(() => {
-                if (config.log && iteration % config.logPeriod === 0) {
-                    console.log('Iteration: ' + iteration);
+        for (let index = 0; index < width * height; index++) {
+            let px: number[] = [];
+            for (let y = 0; y < this.matrixSizes.size; y++) {
+                for (let x = 0; x < this.matrixSizes.size; x++) {
+                    if (this.matrix[y][x]) {
+                        px.push.apply(px, _pixel(data, index, y - this.matrixSizes.center, x - this.matrixSizes.center));
+                    }
                 }
-                for (const trainItem of trainData) {
-                    this.iteration(trainItem);
-                }
-
-                if (iteration % config.callbackPeriod === 0) {
-                    config.callback(iteration);
-                }
-
-                if (iteration === config.iterations) {
-                    clearInterval(interval);
-                    resolve();
-                }
-
-                iteration++;
-            }, 1);
-        });
-    }
-
-    public run(test: number[]) {
-        const result: number[] = [...test];
-
-        for (let index = 0; index < this.size.width * this.size.height; index++) {
-            let px = [
-                ...this.pixel(test, index, 0, 0),
-                ...this.pixel(test, index, -1, -1),
-                ...this.pixel(test, index, 0, -1),
-                ...this.pixel(test, index, 1, -1),
-                ...this.pixel(test, index, -1, 0),
-                ...this.pixel(test, index, 1, 0),
-                ...this.pixel(test, index, -1, 1),
-                ...this.pixel(test, index, 0, 1),
-                ...this.pixel(test, index, 1, 1),
-            ];
+            }
 
             let [r, g, b] = this.perceptron.activate(px);
 
             result[index * 4] = r * 255;
             result[index * 4 + 1] = g * 255;
             result[index * 4 + 2] = b * 255;
+
+            let nextDone = Math.floor(index * 100 / (width * height));
+            if (nextDone !== done) {
+                this.print('Done: ' + done + '%', true);
+                done = nextDone;
+            }
         }
+
+        const doneTime = new Date().getTime() - startTime.getTime();
+        this.print('\nTime: ' + (doneTime / 1000).toFixed(2) + 's' + '\n');
 
         return result;
     };
@@ -105,31 +75,69 @@ class ImageNet {
         console.log('Net Loaded!!!');
     }
 
-    public restore(){
+    public restore() {
         this.perceptron.reset();
         this.perceptron.restore();
     }
 
-    protected iteration({input, output}: { input: number[], output: number[] }) {
-        for (let index = 0; index < this.size.width * this.size.height; index += 2) {
-            let px = [
-                ...this.pixel(input, index, 0, 0),
-                ...this.pixel(input, index, -1, -1),
-                ...this.pixel(input, index, 0, -1),
-                ...this.pixel(input, index, 1, -1),
-                ...this.pixel(input, index, -1, 0),
-                ...this.pixel(input, index, 1, 0),
-                ...this.pixel(input, index, -1, 1),
-                ...this.pixel(input, index, 0, 1),
-                ...this.pixel(input, index, 1, 1),
-            ];
+    protected prepareTrainConfig(options?: ITrainOptsRaw): ITrainOpts {
+        return {
+            ...{
+                log: false,
+                iterations: 100,
+                logPeriod: 10,
+                callback: () => {
+                },
+                callbackPeriod: 1,
+                startTime: new Date().getTime(),
+            },
+            ...options,
+        };
+    }
 
-            this.perceptron.activate(px);
-            this.perceptron.propagate(.12, this.pixel(output, index, 0, 0));
+    protected createPerceptron() {
+        let neurons = 0;
+
+        for (let i = 0; i < this.matrixSizes.size; i++) {
+            for (let j = 0; j < this.matrixSizes.size; j++) {
+                if (this.matrix[i][j]) {
+                    neurons++
+                }
+            }
         }
-    };
 
-    protected pixel(data: number[], index: number, ox: number, oy: number): number[] {
+        console.log('Neurons: ' + (neurons * 3));
+
+        const input = new Layer(neurons * 3);
+        const hiddenLayer = new Layer(neurons);
+        const output = new Layer(3);
+
+        const hidden = [hiddenLayer];
+
+        input.project(hiddenLayer);
+        input.project(output);
+
+        return new Network({
+            input,
+            hidden,
+            output,
+        });
+    }
+
+    protected singleTrain(trainItem: ITrainData, iteration: number, config: ITrainOpts) {
+        this.iteration(trainItem);
+
+        if (config.log && iteration % config.logPeriod === 0) {
+            const one = (new Date().getTime() - config.startTime) / (iteration + 1);
+            const timeWait = (config.iterations * one - (iteration + 1) * one) / 1000;
+            this.print('Iteration: ' + (iteration + 1) + ' wait ' + timeWait.toFixed(2) + 's', true);
+        }
+        if (iteration % config.callbackPeriod === 0) {
+            config.callback(iteration);
+        }
+    }
+
+    protected getPixel(data: number[], index: number, ox: number, oy: number): number[] {
         let y = index / this.size.width | 0;
         let x = index % this.size.width;
 
@@ -147,22 +155,44 @@ class ImageNet {
         return [red / 255, green / 255, blue / 255];
     };
 
-    protected createPerceptron() {
-        const input = new Layer(27);
-        const hiddenLayer = new Layer(8);
-        const output = new Layer(3);
+    protected iteration({input, output}: { input: number[], output: number[] }) {
+        for (let index = 0; index < this.size.width * this.size.height; index += 2) {
+            let px: number[] = [];
 
-        const hidden = [hiddenLayer];
+            for (let y = 0; y < this.matrixSizes.size; y++) {
+                for (let x = 0; x < this.matrixSizes.size; x++) {
+                    if (this.matrix[y][x]) {
+                        px.push.apply(px, this.getPixel(input, index, y - this.matrixSizes.center, x - this.matrixSizes.center));
+                    }
+                }
+            }
 
-        input.project(hiddenLayer);
-        input.project(output);
+            this.perceptron.activate(px);
+            this.perceptron.propagate(.12, this.getPixel(output, index, 0, 0));
+        }
+    };
 
-        return new Network({
-            input,
-            hidden,
-            output,
-        });
+    protected print(message: string, singleLine?: boolean) {
+        console.log(message);
     }
+
+    // public trainAsync(trainData: ITrainData, options?: ITrainOptsRaw) {
+    //     const config = this.prepareTrainConfig(options);
+    //     let iteration = 0;
+    //
+    //     return new Promise((resolve) => {
+    //         const interval = setInterval(() => {
+    //             this.singleTrain(trainData, iteration, config);
+    //
+    //             if (iteration === config.iterations) {
+    //                 clearInterval(interval);
+    //                 resolve();
+    //             }
+    //
+    //             iteration++;
+    //         }, 1);
+    //     });
+    // }
 }
 
 export default ImageNet;

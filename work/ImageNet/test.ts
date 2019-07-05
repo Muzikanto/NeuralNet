@@ -1,40 +1,39 @@
-import ImageNet from "./ImageNet";
+import ImageNetApp from "./ImageNetApp";
 import ParseImage from "./utils/ParseImage/ParseImage";
+import * as cars from './data-train/data-raw/car.json'
+
 
 async function testImageNet() {
     const size = {width: 600, height: 400};
-    const net = new ImageNet(size);
+    const net = new ImageNetApp(size);
     const parser = new ParseImage({size, resize: true});
 
 
-    await parser.loadImage('http://www.britishstyle.net/wp-content/uploads/2018/09/image003.png');
-    const input = parser.toJson().pixels;
-    await parser.prepareImage({});
-    const output = parser.toJson().pixels;
+    await parser.loadImage(cars[0]);
+    const input = parser.toJson().data;
 
-    net.train([
-        {input, output}
-    ], {
+    parser.prepare(['gray', 'sobel']);
+    await parser.draw('img_output.png');
+    const output = parser.toJson().data;
+
+    const trainData = [{input, output}];
+    net.train(trainData, {
         log: true,
-        iterations: 100,
+        logPeriod: 1,
+        iterations: 30,
     });
     net.save();
 
 
-    await parser.loadImage('https://s.auto.drom.ru/i24211/pubs/4/53657/2624530.jpg');
+    parser.setData({resize: true});
+    await parser.loadImage(cars[0]);
+    const test = parser.toJson();
+
     net.load();
-    const test = parser.toJson().pixels;
     const result = net.run(test);
 
-    parser.setPixels(result);
-    await parser.draw('test.png');
-
-    // parser.setPixels(input);
-    // await parser.draw('input.png');
-    // parser.setPixels(output);
-    // await parser.draw('output.png');
-    // parser.setPixels(test);
-    // await parser.draw('test.png');
+    parser.setData({data: result});
+    await parser.draw('img_result.png');
 }
 
 export default testImageNet;
