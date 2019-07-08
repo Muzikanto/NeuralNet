@@ -1,2 +1,4 @@
 .idea
 node_modules
+dist/net.json
+dist/net_meta.json

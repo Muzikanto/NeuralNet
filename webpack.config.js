@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    entry: './work/ImageNetApp/index.ts',
+    entry: './work/ImageNetApp/test.ts',
     module: {
         rules: [
             {

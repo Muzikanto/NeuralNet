@@ -19,7 +19,7 @@ class Net {
     }
 
     public train(rawData: any, options?: INet.TrainOptionsRaw) {
-        console.log('Start Train');
+        process.stdout.write('\nStart Train');
         const config: INet.TrainOptions = {
             ...this.baseTrainOptions,
             ...options,
@@ -44,21 +44,21 @@ class Net {
         }
 
         const doneTime = new Date().getTime() - config.startTime;
-        console.log(`Time: ${(doneTime / 1000).toFixed(2)}s\n`);
+        process.stdout.write(`\nTime: ${(doneTime / 1000).toFixed(2)}s\n`);
     };
 
-    public run(rawData: any): any {
-        console.log('Start Test');
+    public run(rawData: any, params?: any): any {
+        process.stdout.write('\nStart Test');
         const startTime = new Date();
         const testData = this.prepareTestData(rawData);
 
-        const result = this.runActivations(testData);
+        const result = this.runActivations(testData, params);
 
         const doneTime = new Date().getTime() - startTime.getTime();
-        console.log(`Time: ${(doneTime / 1000).toFixed(2)}s\n`);
+        process.stdout.write(`\nTime: ${(doneTime / 1000).toFixed(2)}s\n`);
 
         return result;
-    };
+    }
 
     public save() {
         const netContent = this.net.toJSON();
@@ -82,16 +82,16 @@ class Net {
         this.net.propagate(config.rate, output);
     }
 
-    protected prepareTrainData(rawData: any): INet.TrainData {
+    protected prepareTrainData(rawData: any | number[]): INet.TrainData {
         return rawData;
     }
 
-    protected prepareTestData(rawData: any): number[] {
+    protected prepareTestData(rawData: any): any | number[] {
         return rawData;
     }
 
-    protected runActivations(testData: number[]): any {
-        return this.net.activate(testData);
+    protected runActivations(bites: any | number[], params?: any): any | number[] {
+        return this.net.activate(bites);
     }
 
     protected createNet(inputNeurons: number, hiddenNeurons: number, outputNeurons: number): Network {

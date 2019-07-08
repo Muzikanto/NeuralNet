@@ -1,7 +1,7 @@
 import PredictNet from "./PredictNet";
 import {RowInput} from "neural-data-normalizer/src/normalizer";
 
-async function testWeatherNet() {
+function testPredictNumbers() {
     const net = new PredictNet();
 
     const rawTrain: RowInput[] = [
@@ -15,17 +15,21 @@ async function testWeatherNet() {
         {input: 8, output: 9},
     ];
 
-    net.train(rawTrain);
+    net.train(rawTrain, {
+        log: true, iterations: 2000
+    });
+    net.save();
 
+    net.load();
     const testData = [
+        {input: 1},
+        {input: 2},
         {input: 3},
-        {input: 4},
-        {input: 5},
     ];
 
-    const result = net.run(testData);
+    const result = net.run(testData, 2);
 
     console.log(result);
 }
 
-export default testWeatherNet;
+export default testPredictNumbers;
