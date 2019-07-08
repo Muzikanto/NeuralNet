@@ -13,6 +13,7 @@ namespace INet {
         callback?: (iteration: number) => void;
         callbackPeriod: number;
         startTime: number;
+        rate: number;
     }
 
     export interface TrainOptionsRaw {
@@ -21,6 +22,7 @@ namespace INet {
         logPeriod?: number;
         callback?: (iteration: number) => void;
         callbackPeriod?: number;
+        rate?: number;
     }
 }
 

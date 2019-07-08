@@ -1,13 +1,9 @@
-import {Normalizer} from "./work.utils/Normalizer/Normalizer";
-import {RowInput} from "neural-data-normalizer/src/normalizer";
-import LSTM from "./work.utils/LSTM/LSTM";
-import Net from "./Net";
 import testCommonNet from "./Net/test";
 import testObjectsNet from "./ObjectsNet/test";
 
 // const net = LSTM(1, [4, 4, 4], 1);
 // const normalizer = new Normalizer();
-//
+
 // const rawTrain: RowInput[] = [
 //     {input: 1, output: 2},
 //     {input: 2, output: 3},
@@ -33,7 +29,7 @@ import testObjectsNet from "./ObjectsNet/test";
 //     {input: 4},
 //     {input: 5},
 // ].map(el => normalizer.singleNormalize(el));
-//
+
 // console.log(predict(testData));
 //
 //
@@ -56,5 +52,6 @@ import testObjectsNet from "./ObjectsNet/test";
 //     return arr;
 // }
 
-// testCommonNet();
+testCommonNet();
+console.log('-------------');
 testObjectsNet();

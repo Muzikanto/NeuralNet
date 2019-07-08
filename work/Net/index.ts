@@ -6,20 +6,30 @@ class Net {
     protected net: Network;
     protected fileName: string = 'net';
     protected filePath: string = `dist/${this.fileName}.json`;
+    protected baseTrainOptions = {
+        log: false,
+        iterations: 20000,
+        logPeriod: 10,
+        callbackPeriod: 1,
+        rate: 0.05,
+    };
 
     constructor() {
-        this.net = this.createNet();
+        this.net = this.createNet(2, 3, 1);
     }
 
-    public train(rawData: INet.TrainData, options?: INet.TrainOptionsRaw) {
+    public train(rawData: any, options?: INet.TrainOptionsRaw) {
         console.log('Start Train');
-        const config = this.prepareTrainConfig(options);
-        const trainData = rawData;
+        const config: INet.TrainOptions = {
+            ...this.baseTrainOptions,
+            ...options,
+            startTime: new Date().getTime(),
+        };
+        const trainData = this.prepareTrainData(rawData);
 
         for (let iteration = 0; iteration < config.iterations; iteration++) {
             for (const trainItem of trainData) {
-                this.net.activate(trainItem.input);
-                this.net.propagate(.12, trainItem.output);
+                this.trainIteration(trainItem, config);
 
                 if (config.log && (iteration % config.logPeriod === 0 || iteration === config.iterations - 1)) {
                     const one = (new Date().getTime() - config.startTime) / (iteration + 1);
@@ -37,11 +47,12 @@ class Net {
         console.log(`Time: ${(doneTime / 1000).toFixed(2)}s\n`);
     };
 
-    public run(rawData: any) {
+    public run(rawData: any): any {
         console.log('Start Test');
         const startTime = new Date();
+        const testData = this.prepareTestData(rawData);
 
-        const result = this.net.activate(rawData);
+        const result = this.runActivations(testData);
 
         const doneTime = new Date().getTime() - startTime.getTime();
         console.log(`Time: ${(doneTime / 1000).toFixed(2)}s\n`);
@@ -66,21 +77,25 @@ class Net {
         this.net.restore();
     }
 
-    protected prepareTrainConfig(options?: INet.TrainOptionsRaw): INet.TrainOptions {
-        return {
-            ...{
-                log: false,
-                iterations: 20000,
-                logPeriod: 10,
-                callbackPeriod: 1,
-                startTime: new Date().getTime(),
-            },
-            ...options,
-        };
+    protected trainIteration({input, output}: INet.TrainItem, config: INet.TrainOptions) {
+        this.net.activate(input);
+        this.net.propagate(config.rate, output);
     }
 
-    protected createNet() {
-        return new Architect.Perceptron(2, 3, 1);
+    protected prepareTrainData(rawData: any): INet.TrainData {
+        return rawData;
+    }
+
+    protected prepareTestData(rawData: any): number[] {
+        return rawData;
+    }
+
+    protected runActivations(testData: number[]): any {
+        return this.net.activate(testData);
+    }
+
+    protected createNet(inputNeurons: number, hiddenNeurons: number, outputNeurons: number): Network {
+        return new Architect.Perceptron(inputNeurons, hiddenNeurons, outputNeurons);
     }
 
     protected printProgress(message: string) {

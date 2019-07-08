@@ -2,42 +2,34 @@ import {Normalizer} from "../work.utils/Normalizer/Normalizer";
 import {Architect, Network} from "synaptic";
 import {RowInput} from "neural-data-normalizer/src/normalizer";
 import {IRowInput} from "../work.utils/Normalizer/Normalizer.typings";
+import Net from "../Net";
+import INet from "../Net/Net.typings";
 
-class ObjectsNet {
+class ObjectsNet extends Net{
     protected normalizer = new Normalizer();
-    protected net: Network = this.createNet(2, 1);
 
-    public train(rawData: Array<RowInput>) {
+    protected prepareTrainData(rawData: any): INet.TrainItem[] {
         const trainData = this.normalizer.normalize(rawData, ["airhum"]);
         const {neurons: {inputLength, outputLength}} = this.normalizer.getConfig();
 
-        this.createNet(inputLength, outputLength);
+        this.net = this.createNet(inputLength, inputLength, outputLength);
 
-        for (let i = 0; i < 10000; i++) {
-            for (const v of trainData) {
-                this.net.activate(v.input);
-                this.net.propagate(0.01, v.output);
-            }
-        }
+        return trainData;
     }
 
-    public run(rawData: IRowInput) {
+    protected prepareTestData(rawData: any): number[] {
         if (!this.net) {
             const {inputLength, outputLength} = this.normalizer.getConfig().neurons;
-            this.createNet(inputLength, outputLength);
+            this.createNet(inputLength, inputLength, outputLength);
         }
-        const testData = this.normalizer.singleNormalize(rawData).input;
-        const bites = this.net.activate(testData);
 
-        const result = this.normalizer.denormalize(bites);
-
-        return result;
+        return this.normalizer.singleNormalize(rawData).input;
     }
 
-    protected createNet(inputLength: number, outputLength: number) {
-        this.net = new Architect.Perceptron(inputLength, inputLength, outputLength);
+    protected runActivations(testData: number[]): any {
+        const bites = super.runActivations(testData);
 
-        return this.net;
+        return this.normalizer.denormalize(bites);
     }
 }
 
