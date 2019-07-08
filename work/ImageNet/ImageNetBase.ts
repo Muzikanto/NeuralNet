@@ -35,6 +35,10 @@ class ImageNet {
         this.print('\nTime: ' + (doneTime / 1000).toFixed(2) + 's' + '\n');
     };
 
+    public trainAsync(trainData: ITrainData, options?: ITrainOptsRaw) {
+        this.train(trainData, options);
+    }
+
     public run({data, width, height}: ITestData) {
         const result: number[] = [...data];
         const _pixel = this.getPixel.bind({size: {width, height}});

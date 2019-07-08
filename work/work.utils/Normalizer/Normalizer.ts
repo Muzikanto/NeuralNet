@@ -6,9 +6,8 @@ export class Normalizer {
     protected outputProperties: string[] = [];
     protected neurons: { inputLength: number, outputLength: number } = {inputLength: 2, outputLength: 1};
 
-    public normalize(dataset: Array<IRowInput> = [], outputProperties: string[]): { inputs: number[][], outputs: number[][] } {
-        const binaryInput: number[][] = [];
-        const binaryOutput: number[][] = [];
+    public normalize(dataset: Array<IRowInput> = [], outputProperties: string[]): Array<{input: number[], output: number[]}> {
+        const trainData: Array<{input: number[], output: number[]}> = [];
 
         if (!Array.isArray(dataset)) {
             throw new Error('\x1b[37m\x1b[44mNormalizer input data should be an array of rows: [{...}, {...}]\x1b[0m')
@@ -29,30 +28,27 @@ export class Normalizer {
             const row = dataset[i];
 
             const {
-                inputBits,
-                outputBits,
+                input,
+                output,
             } = this.singleNormalize(row);
 
-            if (inputBits.length > 0) {
-                binaryInput.push(inputBits)
-            }
-            if (outputBits.length > 0) {
-                binaryOutput.push(outputBits)
+            if (input.length > 0 && output.length > 0) {
+                trainData.push({
+                    input,
+                    output,
+                })
             }
         }
 
         this.neurons = {
-            inputLength: binaryInput[0].length,
-            outputLength: binaryOutput[0].length,
+            inputLength: trainData[0].input.length,
+            outputLength: trainData[0].output.length,
         };
 
-        return {
-            inputs: binaryInput,
-            outputs: binaryOutput,
-        }
+        return trainData;
     }
 
-    public denormalize(bites: number[]): RowInput {
+    public denormalize<OUTPUT extends RowInput>(bites: number[]): OUTPUT {
         const result: RowInput = {};
 
         let index = 0;
@@ -123,12 +119,12 @@ export class Normalizer {
             }
         }
 
-        return result;
+        return result as OUTPUT;
     }
 
-    public singleNormalize(row: IRowInput): { inputBits: number[], outputBits: number[] } {
-        let outputBits: number[] = [];
-        let inputBits: number[] = [];
+    public singleNormalize(row: IRowInput): { input: number[], output: number[] } {
+        let input: number[] = [];
+        let output: number[] = [];
 
         for (let prop in row) {
             let bitsArr: number[];
@@ -164,15 +160,15 @@ export class Normalizer {
             }
 
             if (this.outputProperties.indexOf(prop) > -1) {
-                outputBits = outputBits.concat(bitsArr);
+                output = output.concat(bitsArr);
             } else {
-                inputBits = inputBits.concat(bitsArr);
+                input = input.concat(bitsArr);
             }
         }
 
         return {
-            inputBits,
-            outputBits,
+            input,
+            output,
         }
     }
 
@@ -363,6 +359,10 @@ export class Normalizer {
     }
 
     protected numToBit(min: number, max: number, value: number): number {
+        if (max - min === 0) {
+            return 1;
+        }
+
         const num = (value - min) / (max - min);
         return Number((num).toFixed(6));
     }

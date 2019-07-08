@@ -1,5 +1,5 @@
 import ImageNetApp from "./ImageNetApp";
-import ParseImage from "./utils/ParseImage/ParseImage";
+import ParseImage from "../work.utils/ParseImage/ParseImage";
 
 async function testImageNet() {
     const size = {width: 600, height: 400};

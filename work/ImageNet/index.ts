@@ -1,4 +1,5 @@
 import ImageNet from "./ImageNetBase";
+import {ITestData} from "./ImageNet.typings";
 
 const size = {width: 600, height: 400};
 const net = new ImageNet(size);
@@ -14,12 +15,12 @@ const testImage = document.getElementById('test') as HTMLImageElement;
 const outputImage = document.getElementById('output') as HTMLImageElement;
 
 let input: number[];
-let test: number[];
+let test: ITestData;
 let output: number[];
 
 window.onload = () => {
     input = Array.from(getData(inputImage).data);
-    test = Array.from(getData(testImage).data);
+    test = getData(testImage);
     output = Array.from(getData(outputImage).data);
 };
 
@@ -30,12 +31,12 @@ inputUrl.onchange = (e: any) => {
     testImage.setAttribute('crossOrigin', '');
 
     testImage.onload = () => {
-        test = Array.from(getData(testImage).data);
+        test = getData(testImage);
 
         const imgData = ctx.getImageData(0, 0, size.width, size.height);
 
         for (let i = 0; i < imgData.data.length; i++) {
-            imgData.data[i] = test[i];
+            imgData.data[i] = test.data[i];
         }
 
         ctx.putImageData(imgData, 0, 0);
@@ -44,15 +45,15 @@ inputUrl.onchange = (e: any) => {
 
 function runTrain() {
     net.restore();
-    net.trainAsync([
+    net.trainAsync(
         {input, output}
-    ], {
-        log: false,
-        logPeriod: 1,
-        iterations: 20,
-        callbackPeriod: 1,
-        callback: drawResult
-    }).then()
+        , {
+            log: false,
+            logPeriod: 1,
+            iterations: 20,
+            callbackPeriod: 1,
+            callback: drawResult
+        });
 }
 
 let max = 64;
@@ -89,5 +90,11 @@ function getData(img: HTMLImageElement) {
 
     _ctx.drawImage(img, 0, 0, size.width, size.height);
 
-    return _ctx.getImageData(0, 0, size.width, size.height);
+    const data = _ctx.getImageData(0, 0, size.width, size.height);
+
+    return {
+        width: data.width,
+        height: data.height,
+        data: Array.from(data.data),
+    }
 }

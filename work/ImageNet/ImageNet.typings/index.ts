@@ -1,7 +1,7 @@
 export interface ITrainData {
     input: number[],
     output: number[]
-};
+}
 
 export interface ITrainOpts {
     log: boolean,
