@@ -3,16 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "deeplearn": "0.3.12",
     "mnist": "^1.1.0",
-    "react": "^16.1.1",
-    "react-dom": "^16.1.1",
-    "react-scripts": "1.0.17"
+    "synaptic": "^1.1.4"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "@types/synaptic": "^1.0.4",
+    "prettier": "^2.8.1",
+    "pretty-quick": "^3.1.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "xor": "ts-node src/xor/index.ts",
+    "number-image": "ts-node src/number-image/index.ts"
   }
 }
